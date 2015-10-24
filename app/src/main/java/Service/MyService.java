@@ -8,11 +8,17 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.app.Service;
 import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.IBinder;
+import android.text.Editable;
+import android.text.method.KeyListener;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.View;
 
 import java.util.Timer;
 
+import MainLogic.Constants;
 import MainLogic.SensorObject;
 import MainLogic.SensorObjectSerializer;
 
@@ -24,19 +30,22 @@ public class MyService extends Service implements SensorEventListener {
     private final int type_accelerometer = 0;
     private final int type_gyroscope = 1;
     private final int type_orientation = 2;
+    private final int type_Key = 3;
 
     private long lasttime;// Last of sensor
 
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer, sensorGyroscope, sensorOrientation;
-    private SensorObject sensorObject;
+    private SensorObject sensorObject, keyObject;
 
     final float alpha = (float)0.8; // Accelerometer constant
     private float gravity[] = new float[3];
 
     private boolean connect = false;
+    private boolean button_pressed = false;
 
     private ClientTCP clientTCP;
+    MyBinder binder = new MyBinder();
 
     // Create a constant to convert nanoseconds to miliseconds.
     private static final float NanoSecondsToMiliSeconds = 1.0f / 1000000000.0f;
@@ -66,6 +75,8 @@ public class MyService extends Service implements SensorEventListener {
         gravity[2] = 0;
         Log.d(LOG_TAG, " :onCreate");
     }
+
+
     public class connectTask extends AsyncTask<String,String,ClientTCP> {
 
         @Override
@@ -104,6 +115,8 @@ public class MyService extends Service implements SensorEventListener {
     }
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(LOG_TAG, " :onStartCommand");
+
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -113,14 +126,36 @@ public class MyService extends Service implements SensorEventListener {
         Log.d(LOG_TAG, " :onDestroy");
     }
 
-    public IBinder onBind(Intent intent) {
-        Log.d(LOG_TAG, " :onBind");
-        return null;
+
+    public IBinder onBind(Intent arg0) {
+        Log.d(LOG_TAG, "MyService onBind");
+        return binder;
+    }
+
+    public class MyBinder extends Binder {
+        public MyService getService() {
+            return MyService.this;
+        }
+    }
+
+    public void setButtonTrue() {
+        button_pressed = true;
+    }
+
+    public void setButtonFalse() {
+        button_pressed = false;
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if(connect) {
+
+            if(button_pressed){
+                keyObject = new SensorObject(type_Key,0,0,0,0);
+                clientTCP.sendMessage((new SensorObjectSerializer().Serialize(keyObject)));
+                Log.d(LOG_TAG, "KEYBUTTON: " + keyObject.getX() + " " + keyObject.getY() + " " + keyObject.getZ() + " " +
+                        keyObject.getTime());
+            }
             Log.d(LOG_TAG, "Last time:" + (lasttime));
             if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
                 // Isolate the force of gravity with the low-pass filter.
