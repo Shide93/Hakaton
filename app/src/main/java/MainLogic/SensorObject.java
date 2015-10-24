@@ -7,9 +7,9 @@ public class SensorObject {
 
     private int type; // can be 0, 1,2
     private float x, y, z;
-    private float time;
+    private int time;
 
-    public SensorObject(int _type, float _x, float _y, float _z, float _time) {
+    public SensorObject(int _type, float _x, float _y, float _z, int _time) {
         type = _type;
         x = _x;
         y = _y;
@@ -17,7 +17,7 @@ public class SensorObject {
         time = _time;
     }
 
-    public float getTime() {
+    public int getTime() {
         return time;
     }
 
