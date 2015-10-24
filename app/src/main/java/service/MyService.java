@@ -7,6 +7,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -23,8 +24,10 @@ public class MyService extends Service implements SensorEventListener {
     private final int type_gyroscope = 1;
     private final int type_orientation = 2;
 
+    private String ipAddr;
     private Timer timer;
     private long time;
+    private MyBinder binder = new MyBinder();
 
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer, sensorGyroscope, sensorOrientation;
@@ -58,18 +61,19 @@ public class MyService extends Service implements SensorEventListener {
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(LOG_TAG, " :onStartCommand");
+        ipAddr = intent.getStringExtra("ipAddr");
         return super.onStartCommand(intent, flags, startId);
     }
 
     public void onDestroy() {
         super.onDestroy();
-
+        Log.d(LOG_TAG, ipAddr);
         Log.d(LOG_TAG, " :onDestroy");
     }
 
     public IBinder onBind(Intent intent) {
         Log.d(LOG_TAG, " :onBind");
-        return null;
+        return binder;
     }
 
     @Override
@@ -158,5 +162,10 @@ public class MyService extends Service implements SensorEventListener {
 
     }
 
+    public class MyBinder extends Binder {
+        public MyService getService() {
+            return MyService.this;
+        }
+    }
 
 }
