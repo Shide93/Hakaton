@@ -1,24 +1,17 @@
 package service;
 
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.app.Service;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
-import android.text.Editable;
-import android.text.method.KeyListener;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.View;
 
-import java.util.Timer;
-
-import MainLogic.Constants;
 import MainLogic.SensorObject;
 import MainLogic.SensorObjectSerializer;
 
@@ -45,6 +38,7 @@ public class MyService extends Service implements SensorEventListener {
     private boolean button_pressed = false;
 
     private ClientTCP clientTCP;
+    private String ipAddr;
     MyBinder binder = new MyBinder();
 
     // Create a constant to convert nanoseconds to miliseconds.
@@ -61,18 +55,18 @@ public class MyService extends Service implements SensorEventListener {
         } catch (Exception e) {
             Log.e(LOG_TAG, "C: Error", e);
         }
-        // connect to the server
-        new connectTask().execute("");
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        sensorGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        sensorOrientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
-        sensorManager.registerListener(this, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(this, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
-        sensorManager.registerListener(this, sensorOrientation, SensorManager.SENSOR_DELAY_NORMAL);
-        gravity[0] = 0;
-        gravity[1] = 0;
-        gravity[2] = 0;
+//        // connect to the server
+//        new connectTask().execute("");
+//        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+//        sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+//        sensorGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+//        sensorOrientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+//        sensorManager.registerListener(this, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+//        sensorManager.registerListener(this, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+//        sensorManager.registerListener(this, sensorOrientation, SensorManager.SENSOR_DELAY_NORMAL);
+//        gravity[0] = 0;
+//        gravity[1] = 0;
+//        gravity[2] = 0;
         Log.d(LOG_TAG, " :onCreate");
     }
 
@@ -81,7 +75,7 @@ public class MyService extends Service implements SensorEventListener {
 
         @Override
         protected ClientTCP doInBackground(String... message) {
-
+            Log.d(LOG_TAG, "IPADDR - " + ipAddr);
             //we create a TCPClient object and
             clientTCP = new ClientTCP(new ClientTCP.OnMessageReceived() {
                 @Override
@@ -90,7 +84,7 @@ public class MyService extends Service implements SensorEventListener {
                     //this method calls the onProgressUpdate
                     publishProgress(message);
                 }
-            }, "192.168.137.48");
+            }, ipAddr);
             clientTCP.run();
             return null;
         }
@@ -104,6 +98,7 @@ public class MyService extends Service implements SensorEventListener {
 
         }
     }
+
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();
         byte[] data = new byte[len / 2];
@@ -115,7 +110,20 @@ public class MyService extends Service implements SensorEventListener {
     }
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(LOG_TAG, " :onStartCommand");
-
+        ipAddr = intent.getStringExtra("ipAddr");
+        //ipAddr = "192.168.137.48";
+        // connect to the server
+        new connectTask().execute("");
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        sensorOrientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+        sensorManager.registerListener(this, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, sensorOrientation, SensorManager.SENSOR_DELAY_NORMAL);
+        gravity[0] = 0;
+        gravity[1] = 0;
+        gravity[2] = 0;
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -252,6 +260,7 @@ public class MyService extends Service implements SensorEventListener {
     }
 
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for ( int j = 0; j < bytes.length; j++ ) {

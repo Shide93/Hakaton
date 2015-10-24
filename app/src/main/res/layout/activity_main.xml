@@ -18,7 +18,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/editText"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:text="192.168.137.48" />
 
     <Button
         android:id="@+id/btnStart"
