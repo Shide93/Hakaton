@@ -1,4 +1,4 @@
-package Service;
+package service;
 
 import android.content.Context;
 import android.content.Intent;
@@ -7,7 +7,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.app.Service;
-import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -38,7 +37,7 @@ public class MyService extends Service implements SensorEventListener {
     // Create a constant to convert nanoseconds to miliseconds.
     private static final float NanoSecondsToMiliSeconds = 1.0f / 1000000000.0f;
     private final float[] deltaRotationVector = new float[4];
-    private float EPSILON = 380800;
+    private float EPSILON = 617;
 
     final String LOG_TAG = "MyService";
 
