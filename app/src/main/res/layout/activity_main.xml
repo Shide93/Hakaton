@@ -4,7 +4,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:gravity="center_vertical"
+    android:background="@mipmap/montana_spray_bgr"
+    android:weightSum="1">
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.54" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -12,14 +20,24 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Enter server ID"
         android:id="@+id/textView"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:background="#ffffff"
+        android:alpha="0.8" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="0.07" />
 
     <EditText
-        android:layout_width="match_parent"
+        android:layout_width="133dp"
         android:layout_height="wrap_content"
         android:id="@+id/editText"
         android:layout_gravity="center_horizontal"
-        android:text="192.168.137.48" />
+        android:text="192.168.137.48"
+        android:background="#ffffff"
+        android:alpha="0.7" />
 
     <Button
         android:id="@+id/btnStart"
@@ -44,5 +62,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Service stopped"
         android:id="@+id/textView2"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:background="#ffeab8"
+        android:alpha="0.7" />
 </LinearLayout>
