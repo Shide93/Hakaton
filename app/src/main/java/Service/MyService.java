@@ -85,9 +85,12 @@ public class MyService extends Service implements SensorEventListener {
         }
 
         @Override
-        protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
+        protected void onPostExecute(ClientTCP clientTCP) {
+            super.onPostExecute(clientTCP);
             connect = true;
+            if(connect)
+                Log.d("MEGA_LOG_TAG", "true");
+
         }
     }
     public static byte[] hexStringToByteArray(String s) {
@@ -166,7 +169,7 @@ public class MyService extends Service implements SensorEventListener {
                 deltaRotationVector[2] = sinThetaOverTwo * axisZ;
                 deltaRotationVector[3] = cosThetaOverTwo;
 
-                sensorObject = new SensorObject(type_accelerometer, event.values[0] - gravity[0],
+                sensorObject = new SensorObject(type_gyroscope, event.values[0] - gravity[0],
                         event.values[1] - gravity[1],
                         event.values[2] - gravity[2],
                         (int) ((event.timestamp - lasttime) / 1000));
@@ -189,7 +192,7 @@ public class MyService extends Service implements SensorEventListener {
                 float pitch_angle = event.values[1];
                 float roll_angle = event.values[2];
 
-                sensorObject = new SensorObject(type_accelerometer, azimuth_angle,
+                sensorObject = new SensorObject(type_orientation, azimuth_angle,
                         pitch_angle,
                         roll_angle,
                         (int) ((event.timestamp)));
@@ -198,7 +201,7 @@ public class MyService extends Service implements SensorEventListener {
 
                 Log.d(LOG_TAG, "Serializabe: " + bytesToHex(new SensorObjectSerializer().Serialize(sensorObject)));
 
-                    clientTCP.sendMessage((new SensorObjectSerializer().Serialize(sensorObject)));
+                clientTCP.sendMessage((new SensorObjectSerializer().Serialize(sensorObject)));
 
             }
 

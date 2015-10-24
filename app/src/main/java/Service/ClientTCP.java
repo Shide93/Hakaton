@@ -35,7 +35,7 @@ public class ClientTCP {
         try {
             if(out != null) {
                 out.write(message);
-                out.flush();
+              //  out.flush();
             }
         } catch (IOException e) {
             Log.e(LOG_TAG, "Sending error!");
@@ -58,8 +58,8 @@ public class ClientTCP {
             Log.e(LOG_TAG, "C: Connecting...");
             socket = new Socket(serverAddr, SERVERPORT);
             try {
-                out = new DataOutputStream(socket.getOutputStream());;
-
+                out = socket.getOutputStream();
+               // out.write(new byte[]{3,0x23});
                 Log.e(LOG_TAG, "C: Sent.");
 
                 Log.e(LOG_TAG, "C: Done.");
@@ -83,10 +83,6 @@ public class ClientTCP {
 
                 Log.e("TCP", "S: Error", e);
 
-            } finally {
-                //the socket must be closed. It is not possible to reconnect to this socket
-                // after it is closed, which means a new socket instance has to be created.
-                socket.close();
             }
 
 
