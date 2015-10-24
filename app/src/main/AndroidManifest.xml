@@ -19,7 +19,8 @@
             </intent-filter>
         </activity>
         <service
-            android:name="service.MyService">
+            android:name="service.MyService"
+            android:process=":myServiceProcess">
         </service>
     </application>
 

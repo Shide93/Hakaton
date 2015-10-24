@@ -1,12 +1,12 @@
 package service;
 
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.app.Service;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -52,6 +52,7 @@ public class MyService extends Service implements SensorEventListener {
         gravity[2] = 0;
         time = 0;
 
+
         Log.d(LOG_TAG, " :onCreate");
     }
 
@@ -62,6 +63,7 @@ public class MyService extends Service implements SensorEventListener {
 
     public void onDestroy() {
         super.onDestroy();
+
         Log.d(LOG_TAG, " :onDestroy");
     }
 
@@ -155,5 +157,6 @@ public class MyService extends Service implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
+
 
 }
