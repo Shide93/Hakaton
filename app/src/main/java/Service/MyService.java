@@ -163,10 +163,12 @@ public class MyService extends Service implements SensorEventListener {
                 gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1];
                 gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2];
                 // Remove the gravity contribution with the high-pass filter.
-                sensorObject = new SensorObject(type_accelerometer, event.values[0] - gravity[0],
+
+
+                sensorObject = new SensorObject(type_accelerometer,event.values[0] - gravity[0],
                         event.values[1] - gravity[1],
-                        event.values[2] - gravity[2],
-                        (int) ((event.timestamp - lasttime) / 1000));
+                        event.values[1] - gravity[1],
+                        ((int) ((event.timestamp - lasttime) / 1000)));
                  clientTCP.sendMessage((new SensorObjectSerializer().Serialize(sensorObject)));
                 Log.d(LOG_TAG, "Accelerometer:" + sensorObject.getX() + " " + sensorObject.getY() + " " + sensorObject.getZ() + " " +
                         sensorObject.getTime());
@@ -209,18 +211,18 @@ public class MyService extends Service implements SensorEventListener {
                         event.values[2] - gravity[2],
                         (int) ((event.timestamp - lasttime) / 1000));
 
-                  clientTCP.sendMessage((new SensorObjectSerializer().Serialize(sensorObject)));
+                clientTCP.sendMessage((new SensorObjectSerializer().Serialize(sensorObject)));
 
                 Log.d(LOG_TAG, "Gyroscope:" + sensorObject.getX() + " " + sensorObject.getY() + " " + sensorObject.getZ() + " " +
                         sensorObject.getTime());
                 Log.d(LOG_TAG, "Serializabe: " + bytesToHex(new SensorObjectSerializer().Serialize(sensorObject)));
-                // }
+                 }
                 float[] deltaRotationMatrix = new float[9];
                 SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
                 // User code should concatenate the delta rotation we computed with the current rotation
                 // in order to get the updated rotation.
                 // rotationCurrent = rotationCurrent * deltaRotationMatrix;
-            }
+
 
             if (event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
                 float azimuth_angle = event.values[0];
@@ -230,7 +232,7 @@ public class MyService extends Service implements SensorEventListener {
                 sensorObject = new SensorObject(type_orientation, azimuth_angle,
                         pitch_angle,
                         roll_angle,
-                        (int) ((event.timestamp)));
+                        0);
                 Log.d(LOG_TAG, "Orientation:" + sensorObject.getX() + " " + sensorObject.getY() + " " + sensorObject.getZ() + " " +
                         sensorObject.getTime());
 
