@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickStop(View v) {
+        if (!isServiceRunning) { return; }
         stopService(new Intent(this, MyService.class));
         isServiceRunning=false;
         text.setText("Service is stopped");
