@@ -24,11 +24,14 @@ public class MyService extends Service implements SensorEventListener {
     private final int type_gyroscope = 1;
     private final int type_orientation = 2;
     private final int type_Key = 3;
+    private final int type_rotation_vector = 4;
+    private final int type_magnethometer = 5;
+    private final int type_gravity = 6;
 
     private long lasttime;// Last of sensor
 
     private SensorManager sensorManager;
-    private Sensor sensorAccelerometer, sensorGyroscope, sensorOrientation;
+    private Sensor sensorAccelerometer, sensorGyroscope, sensorOrientation, sensorRotationVector, sensorGravity, sensorMagnethometer;
     private SensorObject sensorObject, keyObject;
 
     final float alpha = (float)0.8; // Accelerometer constant
@@ -50,52 +53,25 @@ public class MyService extends Service implements SensorEventListener {
 
     public void onCreate() {
         super.onCreate();
-        try {
-
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "C: Error", e);
-        }
-//        // connect to the server
-//        new connectTask().execute("");
-//        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-//        sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-//        sensorGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-//        sensorOrientation = sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
-//        sensorManager.registerListener(this, sensorAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-//        sensorManager.registerListener(this, sensorGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
-//        sensorManager.registerListener(this, sensorOrientation, SensorManager.SENSOR_DELAY_NORMAL);
-//        gravity[0] = 0;
-//        gravity[1] = 0;
-//        gravity[2] = 0;
         Log.d(LOG_TAG, " :onCreate");
     }
 
+    class ConnectToServer implements Runnable {
 
-    public class connectTask extends AsyncTask<String,String,ClientTCP> {
+        private String ipAddr;
 
-        @Override
-        protected ClientTCP doInBackground(String... message) {
-            Log.d(LOG_TAG, "IPADDR - " + ipAddr);
-            //we create a TCPClient object and
-            clientTCP = new ClientTCP(new ClientTCP.OnMessageReceived() {
-                @Override
-                //here the messageReceived method is implemented
-                public void messageReceived(String message) {
-                    //this method calls the onProgressUpdate
-                    publishProgress(message);
-                }
-            }, ipAddr);
-            clientTCP.run();
-            return null;
+        public ConnectToServer(String _ipAddr) {
+            this.ipAddr = _ipAddr;
+            Log.d(LOG_TAG, "MyRun#" + " create");
         }
 
-        @Override
-        protected void onPostExecute(ClientTCP clientTCP) {
-            super.onPostExecute(clientTCP);
+        public void run() {
+            Log.d(LOG_TAG, "IPADDR - " + ipAddr);
+            clientTCP = new ClientTCP(ipAddr);
+            clientTCP.run();
             connect = true;
             if(connect)
                 Log.d("MEGA_LOG_TAG", "true");
-
         }
     }
 
@@ -111,9 +87,7 @@ public class MyService extends Service implements SensorEventListener {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(LOG_TAG, " :onStartCommand");
         ipAddr = intent.getStringExtra("ipAddr");
-        //ipAddr = "192.168.137.48";
-        // connect to the server
-        new connectTask().execute("");
+        new Thread(new ConnectToServer(ipAddr)).start();
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensorAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         sensorGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -124,13 +98,18 @@ public class MyService extends Service implements SensorEventListener {
         gravity[0] = 0;
         gravity[1] = 0;
         gravity[2] = 0;
-
         return super.onStartCommand(intent, flags, startId);
     }
 
     public void onDestroy() {
         super.onDestroy();
         clientTCP.stopClient();
+        sensorManager.unregisterListener(this, sensorAccelerometer);
+        sensorManager.unregisterListener(this, sensorGyroscope);
+        sensorManager.unregisterListener(this, sensorOrientation);
+        sensorManager.unregisterListener(this, sensorRotationVector);
+        sensorManager.unregisterListener(this, sensorGravity);
+        sensorManager.unregisterListener(this, sensorMagnethometer);
         Log.d(LOG_TAG, " :onDestroy");
     }
 
@@ -157,7 +136,6 @@ public class MyService extends Service implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if(connect) {
-
             if(button_pressed){
                 keyObject = new SensorObject(type_Key,0,0,0,0);
                 clientTCP.sendMessage((new SensorObjectSerializer().Serialize(keyObject)));
@@ -224,12 +202,13 @@ public class MyService extends Service implements SensorEventListener {
                 Log.d(LOG_TAG, "Gyroscope:" + sensorObject.getX() + " " + sensorObject.getY() + " " + sensorObject.getZ() + " " +
                         sensorObject.getTime());
                 Log.d(LOG_TAG, "Serializabe: " + bytesToHex(new SensorObjectSerializer().Serialize(sensorObject)));
-                 }
+
                 float[] deltaRotationMatrix = new float[9];
                 SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
-                // User code should concatenate the delta rotation we computed with the current rotation
-                // in order to get the updated rotation.
-                // rotationCurrent = rotationCurrent * deltaRotationMatrix;
+            }
+            // User code should concatenate the delta rotation we computed with the current rotation
+            // in order to get the updated rotation.
+            // rotationCurrent = rotationCurrent * deltaRotationMatrix;
 
 
             if (event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
@@ -249,7 +228,40 @@ public class MyService extends Service implements SensorEventListener {
                 clientTCP.sendMessage((new SensorObjectSerializer().Serialize(sensorObject)));
 
             }
+            if(false) {
+                if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                    sensorObject = new SensorObject(type_magnethometer, event.values[0],
+                            event.values[1],
+                            event.values[2],
+                            ((int) (event.timestamp - lasttime) / 1000));
+                    Log.d(LOG_TAG, "Magnethometer: " + sensorObject.getX() + " " + sensorObject.getY() + " " + sensorObject.getZ() + " " +
+                            sensorObject.getTime());
+                    Log.d(LOG_TAG, "Serializabe: " + bytesToHex(new SensorObjectSerializer().Serialize(sensorObject)));
+                    clientTCP.sendMessage((new SensorObjectSerializer().Serialize(sensorObject)));
+                }
 
+                if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
+                    sensorObject = new SensorObject(type_magnethometer, event.values[0],
+                            event.values[1],
+                            event.values[2],
+                            ((int) (event.timestamp - lasttime) / 1000));
+                    Log.d(LOG_TAG, "Gravity: " + sensorObject.getX() + " " + sensorObject.getY() + " " + sensorObject.getZ() + " " +
+                            sensorObject.getTime());
+                    Log.d(LOG_TAG, "Serializabe: " + bytesToHex(new SensorObjectSerializer().Serialize(sensorObject)));
+                    clientTCP.sendMessage((new SensorObjectSerializer().Serialize(sensorObject)));
+                }
+
+                if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+                    sensorObject = new SensorObject(type_magnethometer, event.values[0],
+                            event.values[1],
+                            event.values[2],
+                            ((int) (event.timestamp - lasttime) / 1000));
+                    Log.d(LOG_TAG, "Rotation_Vector: " + sensorObject.getX() + " " + sensorObject.getY() + " " + sensorObject.getZ() + " " +
+                            sensorObject.getTime());
+                    Log.d(LOG_TAG, "Serializabe: " + bytesToHex(new SensorObjectSerializer().Serialize(sensorObject)));
+                    clientTCP.sendMessage((new SensorObjectSerializer().Serialize(sensorObject)));
+                }
+            }
             lasttime = event.timestamp;
         }
     }

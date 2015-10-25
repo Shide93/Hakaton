@@ -26,8 +26,7 @@ public class ClientTCP {
     OutputStream out;
     BufferedReader in;
 
-    public ClientTCP(OnMessageReceived listener, String ip_address) {
-        mMessageListener = listener;
+    public ClientTCP(String ip_address) {
         SERVERIP = ip_address;
     }
 
@@ -45,7 +44,10 @@ public class ClientTCP {
     public void stopClient() {
         mRun = false;
         try {
-            socket.close();
+            if(socket != null)
+                socket.close();
+            else
+                socket = null;
         } catch (IOException e) {
             Log.e(LOG_TAG, "Soccket cannot close!");
         }

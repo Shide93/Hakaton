@@ -16,7 +16,6 @@ import service.MyService;
 
 public class MainActivity extends AppCompatActivity {
 
-
     private boolean isServiceRunning = false;
 
     final String LOG_TAG = "MainActivity";
@@ -24,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
     Intent intent;
     MyService myService;
     boolean bound;
+    private TextView text;
+    private TextView ipAddr;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,17 +60,9 @@ public class MainActivity extends AppCompatActivity {
         bound = false;
     }
 
-//    public void onClickStart(View v) {
-//        startService(intent);
-//    }
-//
-//    public void onClickStop(View v) {
-//        stopService(new Intent(this, MyService.class));
-//    }
-
     public void onClickStart(View v) {
-        TextView ipAddr = (TextView) findViewById(R.id.editText);
-        TextView text = (TextView) findViewById(R.id.textView2);
+        ipAddr = (TextView) findViewById(R.id.editText);
+        text = (TextView) findViewById(R.id.textView2);
         text.setText("Service is running");
 
         Log.d(LOG_TAG, "IP = " + ipAddr.getText());
@@ -80,10 +73,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickStop(View v) {
-        boolean stopped = stopService(intent);
-        if (stopped) {
-            isServiceRunning=false;
-        }
+        stopService(new Intent(this, MyService.class));
+        isServiceRunning=false;
+        text.setText("Service is stopped");
     }
 
 
