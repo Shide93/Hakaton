@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         ipAddr = (TextView) findViewById(R.id.editText);
         text = (TextView) findViewById(R.id.textView2);
         text.setText("Service is running");
-
+        if (isServiceRunning) { return; }
         Log.d(LOG_TAG, "IP = " + ipAddr.getText());
         ComponentName cn= startService(intent.putExtra("ipAddr",ipAddr.getText().toString()));
         if(cn != null){
@@ -78,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
         text.setText("Service is stopped");
     }
 
-
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
@@ -89,8 +88,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return new String(hexChars);
     }
-
-
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)  {
@@ -108,6 +105,11 @@ public class MainActivity extends AppCompatActivity {
         if(keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             Log.d(LOG_TAG, "Key_Button:");
             myService.setButtonFalse();
+            return true;
+        }
+        if(keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            Log.d(LOG_TAG, "Key_Down:");
+            myService.setClick();
             return true;
         }
         return false;

@@ -133,6 +133,10 @@ public class MyService extends Service implements SensorEventListener {
         button_pressed = false;
     }
 
+    public void setClick() {
+
+    }
+
     @Override
     public void onSensorChanged(SensorEvent event) {
         if(connect) {
